@@ -1,16 +1,8 @@
-﻿using System;
-using System.Diagnostics;
-using System.Reflection;
-using Modding;
+﻿using Modding;
 using JetBrains.Annotations;
-using ModCommon;
-using MonoMod.RuntimeDetour;
-using UnityEngine.SceneManagement;
 using UnityEngine;
-using USceneManager = UnityEngine.SceneManagement.SceneManager;
 using UObject = UnityEngine.Object;
 using System.Collections.Generic;
-using System.IO;
 
 namespace PVPoP
 {
@@ -23,7 +15,7 @@ namespace PVPoP
 
         public override string GetVersion()
         {
-            return "Prepare to Die";
+            return "Prepare to Die(1.5)";
         }
 
         public override List<(string, string)> GetPreloadNames()
@@ -42,25 +34,24 @@ namespace PVPoP
             preloadedGO["blasts"] = preloadedObjects["GG_Hollow_Knight"]["Battle Scene/Focus Blasts"];
             Instance = this;
             Log("Initalizing.");
-
             Unload();
-            ModHooks.Instance.AfterSavegameLoadHook += AfterSaveGameLoad;
-            ModHooks.Instance.NewGameHook += AddComponent;
+            On.HeroController.Start += AddCP;
         }
 
-        private void AfterSaveGameLoad(SaveGameData data) => AddComponent();
-
-        private void AddComponent()
+        private void AddCP(On.HeroController.orig_Start orig, HeroController self)
         {
-            GameManager.instance.gameObject.AddComponent<FindPain>();
+            orig(self);
+            if(GameManager.instance.gameObject.GetComponent<FindPain>()==null)
+            {
+                GameManager.instance.gameObject.AddComponent<FindPain>();
+            }
         }
 
         public void Unload()
         {
             AudioListener.volume = 1f;
             AudioListener.pause = false;
-            ModHooks.Instance.AfterSavegameLoadHook -= AfterSaveGameLoad;
-            ModHooks.Instance.NewGameHook -= AddComponent;
+            On.HeroController.Start -= AddCP;
 
             // ReSharper disable once Unity.NoNullPropogation
             var x = GameManager.instance?.gameObject.GetComponent<FindPain>();
