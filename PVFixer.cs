@@ -1,12 +1,7 @@
-﻿using System.Collections;
-using HutongGames.PlayMaker.Actions;
-using ModCommon.Util;
-using Modding;
+﻿using HutongGames.PlayMaker.Actions;
 using UnityEngine;
-using UnityEngine.UI;
 using Logger = Modding.Logger;
-using USceneManager = UnityEngine.SceneManagement.SceneManager;
-
+using Satchel;
 namespace PVPoP
 {
     internal class PVFixer : MonoBehaviour
@@ -38,27 +33,27 @@ namespace PVPoP
             }
             
             Log("Done load");
-            _control.InsertMethod("Plume Gen",3,(() =>
+            _control.InsertCustomAction("Plume Gen",(() =>
             {
                 GameObject go = _control.GetAction<SpawnObjectFromGlobalPool>("Plume Gen", 0).storeObject.Value;
                 PlayMakerFSM fsm = go.LocateMyFSM("FSM");
                 fsm.GetAction<FloatCompare>("Outside Arena?", 2).float2.Value = Mathf.Infinity;
                 fsm.GetAction<FloatCompare>("Outside Arena?", 3).float2.Value = -Mathf.Infinity;
-            }));
-            _control.InsertMethod("Plume Gen",5,(() =>
+            }),3);
+            _control.InsertCustomAction("Plume Gen",(() =>
             {
                 GameObject go = _control.GetAction<SpawnObjectFromGlobalPool>("Plume Gen", 4).storeObject.Value;
                 PlayMakerFSM fsm = go.LocateMyFSM("FSM");
                 fsm.GetAction<FloatCompare>("Outside Arena?", 2).float2.Value = Mathf.Infinity;
                 fsm.GetAction<FloatCompare>("Outside Arena?", 3).float2.Value = -Mathf.Infinity;
-            }));
-            _control.InsertMethod("Focus Recover",1, (() =>
+            }),5);
+            _control.InsertCustomAction("Focus Recover", (() =>
             {
                 foreach (Transform i in blasts.transform)
                 {
                     i.gameObject.LocateMyFSM("Control").SendEvent("BLAST");
                 }
-            }));
+            }),1);
             _control.FsmVariables.FindFsmFloat("Stun Land Y").Value = 125.5f;
             _control.FsmVariables.FindFsmFloat("Left X").Value = 214.2f;
             _control.FsmVariables.FindFsmFloat("Right X").Value = 244.2f;
